@@ -1,0 +1,26 @@
+const int ledPin = 12; // Pin donde está conectado el LED
+const int freq = 5000; // Frecuencia del PWM en Hz
+const int channel = 0; // Canal del PWM (0 a 15)
+const int resolution = 8; // Resolución del PWM en bits (de 1 a 16)
+
+void setup() {
+  pinMode(ledPin, OUTPUT);
+
+  ledcSetup(channel, freq, resolution); // Configurar PWM
+  ledcAttachPin(ledPin, channel); // Asociar PWM al pin
+}
+
+void loop() {
+  ledcWrite(channel, 0);
+  delay(3000);
+  // Cambiar el ciclo de trabajo del PWM (de 0 a 255)  -- Subida
+  for (int dutyCycle = 0; dutyCycle <= 255; dutyCycle++) {
+    ledcWrite(channel, dutyCycle);
+    delay(39.22); // Retardo para observar el cambio en el brillo del LED
+  }
+  for (int dutyCycle = 255; dutyCycle  >0; dutyCycle--) {
+    ledcWrite(channel, dutyCycle);
+    delay(39.22); // Retardo para observar el cambio en el brillo del LED
+  }
+  delay(3000);
+}
