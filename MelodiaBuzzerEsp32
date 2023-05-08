@@ -1,0 +1,70 @@
+
+#include <ToneESP32.h>
+// Definición de la frecuencia de las notas musicales
+#define C   261
+#define D   294
+#define E   329
+#define F   349
+#define G   391
+#define A   440
+#define B   493
+#define CS  277
+#define DS  311
+#define FS  370
+#define GS  415
+#define AS  466
+
+// Definición de la duración de las notas
+#define WN  1600  // Nota entera
+#define HN  800   // Media nota
+#define QN  400   // Cuarto de nota
+#define EN  200   // Octava de nota
+#define SN  100   // Decimosexta de nota
+
+// Definición de la melodía del himno nacional mexicano
+int melody[] = {
+  G, E, C, D, E, F, G, G, F, E, D, E, F, G, A, A,
+  G, F, G, A, G, F, E, D, C, C, D, E, F, G, G, F,
+  E, D, E, F, G, A, A, G, F, G, A, G, F, E, D, C,
+  G, E, C, D, E, F, G, G, F, E, D, E, F, G, A, A,
+  G, F, G, A, G, F, E, D, C, G, G, A, C, D, D, D,
+  D, D, C, C, B, C, D, E, F, G, G, F, E, D, E, F,
+  G, A, A, G, F, G, A, G, F, E, D, C
+};
+
+// Definición de la duración de cada nota en la melodía
+int noteDurations[] = {
+  QN, EN, EN, QN, EN, EN, QN, EN, EN, QN, EN, EN, QN, EN, EN, QN, EN,
+  EN, QN, EN, EN, QN, EN, EN, QN, EN, EN, QN, EN, EN, QN, EN, EN, QN,
+  EN, EN, QN, EN, EN, QN, EN, EN, QN, EN, EN, QN, EN, EN, QN, EN, EN,
+  HN, EN, EN, QN, EN, EN, QN, EN, EN, QN, EN, EN, QN, EN, EN, QN, EN,
+  EN, QN, EN, EN, QN, EN, EN, QN, EN, EN, QN, EN, EN, QN, EN, EN, QN,
+  QN, EN, EN, EN, EN, EN, HN, EN, EN, QN, EN, EN, QN, EN, EN, QN, EN,
+  EN, QN, EN, EN, QN, EN, EN, QN, EN, EN, QN, EN, EN, QN, EN, EN, QN
+};
+// Configuración del buzzer
+#define BUZZER_PIN 12
+#define BUZZER_CHANNEL 0
+
+ToneESP32 buzzer(BUZZER_PIN, BUZZER_CHANNEL);
+
+void setup() {
+    
+  pinMode(BUZZER_PIN, OUTPUT);
+}
+
+void loop() {
+  int melodyLength = sizeof(melody) / sizeof(melody[0]);
+  
+  int i = 0;
+ 
+  while (i < melodyLength) {
+    buzzer.tone(melody[i], noteDurations[i]);       
+    
+    delay(noteDurations[i]*0.25);
+  
+    delay(100);
+    i++;
+  }
+  
+}
