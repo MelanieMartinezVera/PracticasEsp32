@@ -1,0 +1,102 @@
+/*********
+I.S.C Erick Renato Vega Cerón
+armsystechno@gmail.com
+Armsys.Tech
+Proyecto Barra con sensor ultrasónico
+*********/
+
+// Incluimos las librerías necesarias para trabajar con la pantalla OLED y el sensor ultrasónico
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+// Definimos el ancho y alto de la pantalla OLED en píxeles
+#define ANCHO_PANTALLA 128
+#define ALTO_PANTALLA 64
+
+// Variables para almacenar los resultados de la medición de distancia
+long duracion;
+float distanciaCm;
+float distanciaMetros;
+
+// Declaración para una pantalla SSD1306 conectada a través de I2C (pines SDA, SCL)
+Adafruit_SSD1306 pantalla(ANCHO_PANTALLA, ALTO_PANTALLA, &Wire, -1);
+
+// Pines a los que está conectado el sensor ultrasónico
+const int pinTrig = 26; // Pin de salida del pulso de trigger
+const int pinEcho = 27; // Pin de entrada para recibir la señal de eco
+
+// Definir la velocidad del sonido en el aire en cm/microsegundos
+#define VELOCIDAD_SONIDO 0.034
+// Factor de conversión para pasar de centímetros a metros
+#define CM_A_METROS 0.01
+
+void setup() {
+  // Inicializamos la comunicación serial a 115200 bps
+  Serial.begin(115200);
+
+  // Inicializar la pantalla OLED
+  if (!pantalla.begin(SSD1306_SWITCHCAPVCC, 0x3C)) {
+    // Si falla la inicialización de la pantalla, mostramos un mensaje y entramos en un bucle infinito
+    Serial.println(F("Fallo en la asignación de OLED"));
+    for (;;) {
+      // Se repite indefinidamente si falla la inicialización de la pantalla
+    }
+  }
+  delay(200); // Pequeño retraso para estabilizar la pantalla
+  pantalla.clearDisplay(); // Limpiar la pantalla
+  pantalla.setTextColor(WHITE);
+  pantalla.setTextSize(1);
+  pantalla.setCursor(40, 30); // Posición del texto en la pantalla (0, 0)
+  pantalla.print("PINGPONG"); 
+  pantalla.display(); // Mostrar el texto "PINGPONG" en la pantalla
+  delay(1500); // Espera 1.5 segundos para ver el mensaje
+  pantalla.clearDisplay(); // Limpiar la pantalla nuevamente
+
+  // Configuramos los pines del sensor ultrasónico
+  pinMode(pinTrig, OUTPUT); // Configura el pinTrig como salida
+  pinMode(pinEcho, INPUT); // Configura el pinEcho como entrada
+  pantalla.setTextSize(1); // Establecer el tamaño de fuente en la pantalla
+}
+
+void loop() {
+  pantalla.clearDisplay(); // Limpiar la pantalla
+
+  // Generamos un pulso de ultrasonido para medir la distancia
+  digitalWrite(pinTrig, LOW); // Limpia el pinTrig
+  delayMicroseconds(2);
+  digitalWrite(pinTrig, HIGH); // Establece el pinTrig en estado ALTO durante 10 microsegundos
+  delayMicroseconds(10);
+  digitalWrite(pinTrig, LOW);
+
+  // Leemos el tiempo que tarda la onda de sonido en regresar al sensor (eco)
+  duracion = pulseIn(pinEcho, HIGH);
+
+  // Calculamos la distancia en centímetros
+  distanciaCm = duracion * VELOCIDAD_SONIDO / 2;
+
+  // Convertimos la distancia a metros
+  distanciaMetros = distanciaCm * CM_A_METROS;
+
+  // Mostramos la distancia en la pantalla OLED
+  pantalla.setCursor(1, 0);
+  pantalla.print("Distancia (cm): ");
+  pantalla.setCursor(50, 20);
+  pantalla.print(distanciaCm);
+
+  // Mostramos también la distancia en el Monitor Serial
+  Serial.print("Distancia (cm): ");
+  Serial.println(distanciaCm);
+
+  // Si la distancia medida está entre 0 y 150 cm, mostramos una barra en la pantalla proporcional a la distancia
+  pantalla.setCursor(0, 30);
+  if (distanciaCm > 0 && distanciaCm < 150) {
+    for (int i = 0; i < distanciaCm; i++) {
+      pantalla.fillRoundRect(0, 35, distanciaCm, 35, 2, WHITE);
+    }
+  }
+
+  // Mostrar en la pantalla OLED
+  pantalla.display();
+  delay(1000); // Esperar 1 segundo antes de realizar la siguiente medición
+}
